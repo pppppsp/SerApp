@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %} Страница регистрации {% endblock title %}
+{% block content %}
+
+<div class="mt-2">
+        <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">Регистрация</h3>
+        <form action="">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <button class = 'flex justify-center hidden sm:flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors w-[100px]'>Создать</button>
+        </form>
+</div>
+
+{% endblock content %}

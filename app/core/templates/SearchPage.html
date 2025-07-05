@@ -1,0 +1,137 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block title %} Поиск журналов {% endblock title %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Форма поиска -->
+        <form class="p-6" method="POST" id="form_for_journals">
+            {% csrf_token %}
+            <input type="hidden" name="input" value="search">
+            <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">Параметры для подбора научного журнала</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Уровень журнала -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Уровень журнала:</label>
+                    <select name="level"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        id="level">
+                        {% for item in levels %}
+                        <option value="{{ item.number }}">Уровень {{ item.number }}</option>
+                        {% empty %}
+                        <option disabled>Нет данных</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Язык -->
+                <!-- <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Язык:</label>
+                    <select name="lang"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        id='lang'>
+                        {% for item in langs %}
+                        <option value="{{ item.pk }}">{{ item.name }}</option>
+                        {% empty %}
+                        <option disabled>Нет данных</option>
+                        {% endfor %}
+                    </select>
+                </div> -->
+
+                <!-- Страна -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Страна:</label>
+                    <select name="country"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        id="country">
+                        {% for item in country %}
+                        <option value="{{ item.name_mal }}">{{ item.name }}</option>
+                        {% empty %}
+                        <option disabled>Нет данных</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Тип доступа -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Тип доступа:</label>
+                    <select name="open_access"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        id="open_access">
+                        <option value="1">Открытый</option>
+                        <option value="0">Закрытый</option>
+                    </select>
+                </div>
+                <div class="w-full mx-auto px-4">
+                    <label for="range" class="block text-sm font-medium text-gray-700 mb-2">
+                        Выберите значение Хирша от 0 до
+                    </label>
+
+                    <input name='h_index' id='h_index' type="range" min="0" max="300" step="3"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+
+                    <!-- Шкала -->
+                    <div class="relative w-full flex justify-between text-xs text-gray-500 mt-2">
+                        <span>0</span>
+                        <span>150</span>
+                        <span>300</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Кнопки -->
+            <div class="mt-8 flex justify-center space-x-4">
+                <a type="reset" href = "{% url 'search' %}"
+                    class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Очистить
+            </a>
+                <button type="submit"
+                    class="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    id="button-form">
+                    Поиск журналов
+                </button>
+            </div>
+        </form>
+
+
+        <!-- Результаты поиска -->
+        <div class="border-t border-gray-200 p-6 bg-gray-50">
+            {% if got_journals %}
+            <h3 class="text-xl font-semibold text-center mb-4 text-gray-800">Найденные журналы</h3>
+            <div class="space-y-4 overflow-auto" id="window_journal" style="height:300px;">
+                <div id="window_temp">
+                    {% for item in got_journals %}
+                    <div class="p-4 bg-white rounded-lg shadow-sm border border-gray-200 mt-2">
+                        <p class="text-gray-800"><span class="font-medium">Название научного журнала:</span> {{ item.title }}</p>
+                        <p class="text-gray-800"><span class="font-medium"> ISSN:</span> {{ item.issn}}</p>
+                        <p class="text-gray-800"><span class="font-medium"> Уровень:</span> {{ item.levels }}</p>
+                        <p class="text-gray-800"><span class="font-medium"> Страна:</span> {{ item.country }}</p>
+                        <!-- <p class="text-gray-800"><span class="font-medium"> Язык:</span>{{ item.language}}</p> -->
+                        <p class="text-gray-800"><span class="font-medium"> Тип доступа:</span>
+                            {% if item.is.oa.0 == false %}
+                            закрытый
+                            {% else %}
+                            открытый
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-800"><span class="font-medium"> Индекс Хирша: {{ item.h_index}}</span>
+                            <!-- Здесь можно добавить больше информации о журнале -->
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+            {% else %}
+            <p class="text-center text-gray-600 py-4">Пока ничего не найдено. Измените параметры поиска.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/form_journals.js' %}"></script>
+{% endblock scripts %}
